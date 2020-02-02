@@ -1,3 +1,5 @@
+const Role = use('Adonis/Acl/Role');
+
 class TeamController {
   async index({ auth }) {
     const teams = await auth.user.teams().fetch();
@@ -14,6 +16,15 @@ class TeamController {
       ...data,
       user_id: user.id,
     });
+
+    const admin = await Role.findBy('slug', 'administrator');
+
+    const teamJoin = await auth.user
+      .teamJoins()
+      .where('team_id', team.id)
+      .first();
+
+    await teamJoin.roles().attach([admin.id]);
 
     return team;
   }
